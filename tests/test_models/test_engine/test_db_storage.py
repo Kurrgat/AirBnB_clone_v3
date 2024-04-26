@@ -86,3 +86,18 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get(self):
+        """Test the get function and what is passed to it"""
+        id = list(storage.all("State").values())[0].id
+        self.assertTrue(type(storage.get("State", id)) == 'models.state.State')
+        # repeat for all class types?
+        self.assertTrue(storage.get("State", None) is None)
+        self.assertTrue(storage.get(None, id) is None)
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_count(self):
+        """Test to see if count is working properly"""
+        # do it for all classes?
+        self.assertTrue(type(storage.count(None)) == type(int))
