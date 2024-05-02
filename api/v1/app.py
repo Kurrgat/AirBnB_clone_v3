@@ -1,45 +1,39 @@
 #!/usr/bin/python3
-"""
-app
-"""
+"""creating a flask application"""
 
-from flask import Flask, jsonify
-from flask_cors import CORS
-from os import getenv
-
-from api.v1.views import app_views
+import os
+from flask import Flask
 from models import storage
+from api.v1.views import app_views
+from flask_cors import CORS
 
 
+# Create a Flask application instance
 app = Flask(__name__)
 
-CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
-
+# Register the blueprint app_views
 app.register_blueprint(app_views)
 
+# Initialize CORS with the app instance
+CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 
+
+# Declare a method to handle teardown
 @app.teardown_appcontext
 def teardown(exception):
-    """
-    teardown function
-    """
+    """closes the current SQLAchemy session"""
     storage.close()
 
 
 @app.errorhandler(404)
-def handle_404(exception):
-    """
-    handles 404 error
-    :return: returns 404 json
-    """
-    data = {
-        "error": "Not found"
-    }
+def page_not_found(error):
+    """Handler for 404 Not found errors"""
+    return ({'error': 'Not found'}), 404
 
-    resp = jsonify(data)
-    resp.status_code = 404
 
-    return(resp)
-
-if __name__ == "__main__":
-    app.run(getenv("HBNB_API_HOST"), getenv("HBNB_API_PORT"))
+if __name__ == '__main__':
+    host = os.getenv('HBNB_API_HOST', '0.0.0.0')
+    port = int(os.getenv('HBNB_API_PORT', 5000))
+    # getenv returns a string and port is an int
+    # THREADED is set to true so it can serve multiple requests at once
+    app.run(host=host, port=port, threaded=True)
